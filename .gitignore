@@ -1,0 +1,47 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+.vite/
+.cache/
+
+# Tests / tooling caches
+coverage/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Env (be specific; don't blanket-ignore *.local)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# (Optional) Local export artifacts — adjust to your project
+# exports/
+# pdf/
+# out/
+# build/
+
+# Package manager artifacts
+*.tgz
