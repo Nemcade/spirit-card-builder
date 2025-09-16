@@ -1900,7 +1900,7 @@ html, body, #root{
 /* In 2-column mode, a “double break” jumps to the next column */
 .skill-cols.cols-2 .col-break{
   display:block;
-  height:0;           /* no extra vertical gap */
+  height:0;           /* no extra vertical gaps */ 
   line-height:0;
   break-after: column;
   -webkit-column-break-after: always;  /* Safari/WebKit */
