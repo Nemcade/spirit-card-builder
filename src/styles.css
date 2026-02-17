@@ -94,6 +94,8 @@
 .app-grid{
   display:grid; grid-template-columns:minmax(360px,auto) 1fr;
   gap:16px; align-items:flex-start;
+  min-width: 0;
+  overflow-x: hidden;
   
 }
 aside{ position:sticky; top:16px; }
@@ -1521,8 +1523,9 @@ strong.num, .num{
     0 0 0 1px rgba(255,255,255,.35),
     0 0 32px rgba(143,77,255,.42),
     0 14px 34px rgba(0,0,0,.55);
-  transform: translateY(-1px);
+  transform: none; /* prevents scrollbar flicker */
 }
+
 
 /* ===== Badges / Pills: holographic foil ===== */
 [data-theme="spirit-overdrive"] .badge,
@@ -1571,6 +1574,28 @@ strong.num, .num{
 [data-theme="spirit-overdrive"] .accent{ color: var(--ui-accent); }
 [data-theme="spirit-overdrive"] ::selection{
   background: rgba(143,77,255,.45); color: #fff;
+}
+
+[data-theme="spirit-overdrive"] button:hover{
+  filter: none;
+  background: rgba(155,255,58,.10);
+  border-color: rgba(155,255,58,.35);
+}
+
+[data-theme="spirit-overdrive"] button:focus-visible{
+  outline: 2px solid rgba(25,226,255,.85);
+  outline-offset: 2px;
+}
+
+[data-theme="spirit-overdrive"] .app-grid > section{
+  scrollbar-color: rgba(155,255,58,.35) transparent;
+}
+[data-theme="spirit-overdrive"] .app-grid > section::-webkit-scrollbar{ width: 10px; }
+[data-theme="spirit-overdrive"] .app-grid > section::-webkit-scrollbar-thumb{
+  background: rgba(155,255,58,.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 /* ===== Animations ===== */
@@ -1632,6 +1657,13 @@ section, .panel{
   border-radius: 10px;
   padding: 10px;
 }
+
+/* Prevent scrollbar flicker: reserve gutter space */
+.app-grid > section{
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+}
+
 
 /* Forms */
 input, select, textarea, button, label{ font: inherit; }

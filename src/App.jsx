@@ -915,14 +915,15 @@ const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
   
   return (
   <div
-    className="app-grid"
-    style={{
-      display: 'grid',
-      gridTemplateColumns: 'minmax(360px,auto) minmax(440px,1.35fr) minmax(340px,0.85fr) minmax(340px,0.8fr)',
-      gap: 16,
-      alignItems: 'start'
-    }}
-  >
+  className="app-grid"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+    gap: 16,
+    alignItems: 'start'
+  }}
+>
+
 
     {/* 1) CARD — live preview (sticky) */}
     <aside
@@ -984,16 +985,18 @@ const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
 
     {/* 2) SKILLS — its own column, scrollable */}
     <section
-      className="skills-editor-panel"
-      style={{
-        gridColumn: '2',
-        position: 'sticky',
-        top: 16,
-        alignSelf: 'flex-start',
-        maxHeight: 'calc(100vh - 32px)',
-        overflow: 'auto'
-      }}
-    >
+  className="skills-editor-panel"
+  style={{
+    gridColumn: '2',
+    position: 'sticky',
+    top: 16,
+    alignSelf: 'flex-start',
+    maxHeight: 'calc(100vh - 32px)',
+    overflowY: 'auto',
+    overflowX: 'hidden'
+  }}
+>
+
       <h2 style={{ marginTop: 0 }}>Skills</h2>
 
       {/* Add new paragraph/skill lives here so editor column won’t jump */}
@@ -1021,7 +1024,9 @@ const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
         top: 16,
         alignSelf: 'flex-start',
         maxHeight: 'calc(100vh - 32px)',
-        overflow: 'auto'
+        overflowY: 'auto',
+overflowX: 'hidden'
+
       }}
     >
       <h2 style={{ marginTop: 0 }}>Card Editor</h2>
@@ -1215,17 +1220,24 @@ const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
         </div>
 
  {/* Selects */}
-<div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:6, marginBottom:8 }}>
+<div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))', gap:6, marginBottom:8 }}>
   <select value={filters.type} onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}>
     <option value="">Type (any)</option>
     {typeOptions.map(o => <option key={o} value={o}>{o}</option>)}
   </select>
 
-  <select value={filters.rarity} onChange={e => setFilters(f => ({ ...f, rarity: e.target.value }))}>
-    <option value="">Rarity (any)</option>et.value }))}>
-    <option value="">Rarity (any)</option>
-    {rarityOptions.map(o => <option key={o} value={o}>{o}</option>)}
-  </select>
+<select
+  value={filters.rarity ?? ""}
+  onChange={(e) => setFilters((f) => ({ ...f, rarity: e.target.value }))}
+>
+  <option value="">Rarity (any)</option>
+  {rarityOptions.map((o) => (
+    <option key={o} value={o}>
+      {o}
+    </option>
+  ))}
+</select>
+
 
   <select value={filters.size} onChange={e => setFilters(f => ({ ...f, size: e.target.value }))}>
     <option value="">Size (any)</option>

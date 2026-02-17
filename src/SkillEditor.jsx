@@ -60,13 +60,15 @@ const removeSection = (i) => {
       }}
     >
       {/* Header row */}
-      <div style={{ display:'grid', gridTemplateColumns:'190px 1fr auto', gap:8, alignItems:'center' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 90px auto', gap:8, alignItems:'center' }}>
+
 
         <input
           placeholder="Title"
           value={s.title || ''}
           onChange={set('title')}
-          style={{ flex: 1 }}
+          style={{ minWidth: 0 }}
+
         />
           <select value={s.kind} onChange={set('kind')} style={{ width: 80 }}>
     <option value="skill">Skill</option>
@@ -88,7 +90,8 @@ const removeSection = (i) => {
       </div>
 
       {/* Proficiency + dots */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 120px', gap: 8 }}>
+
         <div>
           <input
             placeholder={
