@@ -366,17 +366,23 @@ button:hover{ background:#eee }
   color:#000; margin:0 0 .8rem; font-size:.85rem; line-height:1.15rem; text-wrap:pretty;
 }
 
-.skills p.skill-text { all: unset; }         /* reset any earlier props */
+.skills p.skill-text{
+  display: flow-root; /* contains .emoji-lead floats so --- won't clear them */
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
 .skills p.skill-text {                        /* re-apply just what we want */
-  display: block;
+  display: flow-root;        /* ✅ contains floated .emoji-lead inside this paragraph */
   color: #000;
   font-size: .85rem;
-  line-height: 1.20;      /* ← line spacing inside paragraphs */
-  margin: 0 0 5px;       /* ← gap between paragraphs */
-  padding: 0 3px;         /* horizontal inset inside the text box */
+  line-height: 1.20;         /* line spacing inside paragraphs */
+  margin: 0 0 5px;           /* gap between paragraphs */
+  padding: 0 3px;            /* horizontal inset inside the text box */
   text-wrap: pretty;
-  white-space: { white-space: normal !important; }
+  white-space: normal !important;
 }
+
 
 .skills p.skill-text .li-bullet{
   display: inline-block;
@@ -384,15 +390,38 @@ button:hover{ background:#eee }
   transform: translateY(-1px);
 }
 
-.skills .rule{
+/* Normalize markdown lists inside skills so "-" doesn't change indentation */
+.skills ul,
+.skills ol{
+  margin: 0;
+  padding: 0;
+}
+
+.skills li{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  /* Contain floats inside list items too (same intent as p.skill-text::after) */
+  display: flow-root;
+}
+
+
+/* Base rule style everywhere (skills + flavor + anywhere else formatText is used) */
+.rule{
   display: block;
   height: 0;
   border: 0;
   border-top: var(--rule-thickness) solid var(--rule-color);
   margin: var(--rule-gap) 0;
-  clear: both;                 /* don't collide with leading floated icons */
+}
+
+/* Keep your skill-specific layout protections */
+.skills .rule{
+  clear: none;                 /* don't collide with leading floated icons */
   break-inside: avoid-column;  /* keep it intact within the column */
 }
+
 
 /* Keyword accents */
 .kwd{
@@ -751,17 +780,20 @@ b.kwd.kwd.title.nowrap{
   float: left;
   width: var(--indent, 1.2em);
   margin: 0 0.3em 0 0;
+
+  /* Key fix: prevent the float from being “taller than a line” */
+  height: 1em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
+
+
 
 /* If the icon is leading, remove the default inline gap from the inner wrap */
 .skills .emoji-lead .emoji-wrap{ margin: 0; }
 
-/* Contain floats so the paragraph's height/columns account for them */
-.skills p.skill-text::after{
-  content:"";
-  display: block;
-  clear: both;
-}
+
 
 
 strong.num, .num{
@@ -1922,12 +1954,10 @@ html, body, #root{
   -webkit-column-break-after: always; /* Safari/WebKit */
 }
 
-/* single-Enter line break height (adjust to taste) */
 .skills p.skill-text .lb {
-  display: block;
-  height: 0.25em; /* tweak this */
-  line-height: 0;
+  display: none;
 }
+
 
 /* In 2-column mode, a “double break” jumps to the next column */
 .skill-cols.cols-2 .col-break{
@@ -1978,3 +2008,6 @@ html, body, #root{
   text-align:center;
   transform: translateY(-0.06em);
 }
+
+/* formatText helpers */
+.ft-u { text-decoration: underline; }

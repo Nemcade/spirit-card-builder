@@ -55,7 +55,7 @@ const OVERLAYS = {
 /* rarity palettes */
 const RARITY_CLASSIC = {
   Common:'#362962', Crafted:'#20250a', Enigmatic:'#004e6a',
-  Storied:'#4b184b', Primordial:'#560720', Exotic:'#560720',
+  Storied:'#4b184b', Primordial:'#161616', Exotic:'#560720',
   Otherworldly:'#5c2713', 'Core Challenge':'#454545', 'Sub-Challenge':'#454545'
 };
 
@@ -608,9 +608,10 @@ const accentInk = (printMode === 'gray') ? '#000000' : accent;
     )}
 
     <div className="flavor-box">
-      <h4 className="flavor-name">{card.name || ''}</h4>
-      <p className="flavor">{card.flavor || ''}</p>
-    </div>
+  <h4 className="flavor-name">{card.name || ''}</h4>
+  <p className="flavor">{formatText(card.flavor || '', titles)}</p>
+</div>
+
   </div>
 
   {/* The type badge floats over the border at the bottom */}
