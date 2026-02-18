@@ -2011,3 +2011,20 @@ html, body, #root{
 
 /* formatText helpers */
 .ft-u { text-decoration: underline; }
+
+.panel-summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  cursor:pointer;
+  list-style:none;
+  user-select:none;
+  font-weight:700;
+  margin:0;
+}
+
+.panel-summary::-webkit-details-marker{
+  display:none;
+}
+

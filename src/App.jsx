@@ -47,7 +47,7 @@ async function preloadNunito() {
 }
 
 const CHALLENGE_CATEGORIES = [
-  'Combat','Environmental','Social','Exploration','Puzzle','Hazard','Trap'
+  'Combat','Environmental','Social','Exploration','Puzzle','Hazard','Trap','Affliction'
 ];
 const CHALLENGE_RARITIES = ['Core Challenge', 'Sub-Challenge'];
 
@@ -391,7 +391,74 @@ useEffect(() => {
 }, []);
 
   /* 2) field helpers ------------------------------------------------------ */
-  const setField = (k,v)=> setCard(c=>({...c,[k]:v}));
+
+  // These drive what shows in the editor dropdowns based on kind
+  const isChallengeKind = (kind) => kind === 'Challenge';
+
+  const filterEditorTypeOptions = (opts, kind) => {
+    if (isChallengeKind(kind)) {
+      return opts.filter(o => CHALLENGE_RARITIES.includes(o));
+    }
+    return opts.filter(o => !CHALLENGE_RARITIES.includes(o));
+  };
+
+  const filterEditorSizeOptions = (opts, kind) => {
+    if (isChallengeKind(kind)) {
+      return opts.filter(o => CHALLENGE_CATEGORIES.includes(o));
+    }
+    return opts.filter(o => !CHALLENGE_CATEGORIES.includes(o));
+  };
+
+  const filterEditorRarityOptions = (opts, kind) => {
+    if (isChallengeKind(kind)) {
+      return opts.filter(o => CHALLENGE_RARITIES.includes(o));
+    }
+    return opts.filter(o => !CHALLENGE_RARITIES.includes(o));
+  };
+
+  const filterEditorValueTypeOptions = (opts, kind) => {
+    if (isChallengeKind(kind)) {
+      // challenge uses Danger only
+      return opts.filter(o => normalizeVT(o) === 'Danger');
+    }
+    // items: everything except Danger
+    return opts.filter(o => normalizeVT(o) !== 'Danger');
+  };
+
+  const setField = (k, v) => {
+    // When switching kind, clamp dependent fields so the editor doesn't keep invalid values
+    if (k === 'kind') {
+      const nextKind = v;
+
+      setCard(c => {
+        const next = { ...c, kind: nextKind };
+
+        const allowedType     = new Set(filterEditorTypeOptions(typeOptions, nextKind));
+        const allowedSize     = new Set(filterEditorSizeOptions(sizeOptions, nextKind));
+        const allowedRarity   = new Set(filterEditorRarityOptions(rarityOptions, nextKind));
+        const allowedValueTyp = new Set(filterEditorValueTypeOptions(valueTypeOptions, nextKind));
+
+        if (!allowedType.has(String(next.type || '').trim())) next.type = '';
+        if (!allowedSize.has(String(next.size || '').trim())) next.size = '';
+        if (!allowedRarity.has(String(next.rarity || '').trim())) next.rarity = '';
+
+        const vt = normalizeVT(next.valueType || '');
+        if (!allowedValueTyp.has(vt)) {
+          // for Challenge default to Danger, for Item clear it
+          next.valueType = isChallengeKind(nextKind) ? 'Danger' : '';
+        } else {
+          next.valueType = vt;
+        }
+
+        return next;
+      });
+
+      return;
+    }
+
+    setCard(c => ({ ...c, [k]: v }));
+  };
+
 
   /* ---------- skill helpers ---------- */
   const addSkill = () =>
@@ -546,7 +613,7 @@ const [zoom, setZoom] = useState(1.00);
   
   const sizes = uniqSorted([
     'Light','Medium','Heavy','Fixed',
-	...CHALLENGE_CATEGORIES, 'Combat','Environmental','Social','Exploration','Puzzle','Hazard','Trap',
+	...CHALLENGE_CATEGORIES, 'Combat','Environmental','Social','Exploration','Puzzle','Hazard','Trap','Affliction',
     ...library.map(c => c.size)
   ]);
   const profs = uniqSorted(
@@ -906,12 +973,31 @@ const exportFilteredCardsJson = () => {
   /* ---------------------------------------------------------------------- */
   
   // right above the TYPE / SIZE / RARITY / VALUE blocks
-const isChallenge = card.kind === 'Challenge';
-const typePh        = isChallenge ? 'Challenge Type'      : 'Type';
-const sizeLabel     = isChallenge ? 'Domain — required'    : 'Size — required';
-const rarityLabel   = isChallenge ? 'Challenge Kind — required' : 'Rarity — required';
-const valuePh       = isChallenge ? 'Danger (dots)'        : 'Value';
-const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
+  const isChallenge = card.kind === 'Challenge';
+  const typePh        = isChallenge ? 'Challenge Type'      : 'Type';
+  const sizeLabel     = isChallenge ? 'Domain — required'    : 'Size — required';
+  const rarityLabel   = isChallenge ? 'Challenge Kind — required' : 'Rarity — required';
+  const valuePh       = isChallenge ? 'Danger (dots)'        : 'Value';
+  const valueTypePh   = isChallenge ? 'Danger Type'          : 'Value Type';
+
+  // Editor-only option lists (filtered by Item vs Challenge)
+  const editorTypeOptions = useMemo(
+    () => filterEditorTypeOptions(typeOptions, card.kind),
+    [typeOptions, card.kind]
+  );
+  const editorSizeOptions = useMemo(
+    () => filterEditorSizeOptions(sizeOptions, card.kind),
+    [sizeOptions, card.kind]
+  );
+  const editorRarityOptions = useMemo(
+    () => filterEditorRarityOptions(rarityOptions, card.kind),
+    [rarityOptions, card.kind]
+  );
+  const editorValueTypeOptions = useMemo(
+    () => filterEditorValueTypeOptions(valueTypeOptions, card.kind),
+    [valueTypeOptions, card.kind]
+  );
+
   
   return (
   <div
@@ -1054,13 +1140,16 @@ overflowX: 'hidden'
       {/* TYPE (datalist) */}
       <div className="field-row">
         <input
-          placeholder="typePh"
-          className={isBlank(card.type) ? 'invalid' : ''}
-          value={card.type}
-          list="typeDL"
-          onChange={e => setField('type', e.target.value)}
-        />
-        <datalist id="typeDL">{typeOptions.map(o => <option key={o} value={o} />)}</datalist>
+  placeholder={typePh}
+  className={isBlank(card.type) ? 'invalid' : ''}
+  value={card.type}
+  list="typeDL"
+  onChange={e => setField('type', e.target.value)}
+/>
+<datalist id="typeDL">
+  {editorTypeOptions.map(o => <option key={o} value={o} />)}
+</datalist>
+
         <Warn show={isBlank(card.type)} />
       </div>
 
@@ -1072,7 +1161,7 @@ overflowX: 'hidden'
           onChange={e => setField('size', e.target.value)}
         >
           <option value="" disabled>{sizeLabel}</option>
-          {sizeOptions.map(o => <option key={o} value={o}>{o}</option>)}
+          {editorSizeOptions.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
         <Warn show={isBlank(card.size)} />
       </div>
@@ -1085,7 +1174,7 @@ overflowX: 'hidden'
           onChange={e => setField('rarity', e.target.value)}
         >
           <option value="" disabled>{rarityLabel}</option>
-          {rarityOptions.map(o => <option key={o} value={o}>{o}</option>)}
+          {editorRarityOptions.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
         <Warn show={isBlank(card.rarity)} />
       </div>
@@ -1118,8 +1207,9 @@ overflowX: 'hidden'
           onChange={e => setField('valueType', normalizeVT(e.target.value))}
         />
         <datalist id="valueTypeDL">
-          {valueTypeOptions.map(o => <option key={o} value={o} />)}
-        </datalist>
+  {editorValueTypeOptions.map(o => <option key={o} value={o} />)}
+</datalist>
+
         <Warn show={isBlank(card.valueType)} />
       </div>
 
@@ -1178,16 +1268,22 @@ overflowX: 'hidden'
 	
 
     {/* 4) LIBRARY — Search, Filters, Library, Export, and (bottom) Fonts/Palette */}
-    <section
+        <section
       style={{
         gridColumn: '4',
         position: 'sticky',
         top: 16,
         alignSelf: 'flex-start',
         maxHeight: 'calc(100vh - 32px)',
-        overflow: 'auto'
+        overflow: 'hidden',
+
+        maxHeight: 'calc(100vh - 32px)',
+        overflow: 'auto',
+        paddingRight: 4
+
       }}
     >
+
       {/* Theme (moved here) */}
       <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', alignItems:'center', gap:8, marginBottom:8, fontSize:12 }}>
         <span>Theme</span>
@@ -1206,9 +1302,15 @@ overflowX: 'hidden'
         </select>
       </div>
 
-      {/* ===== FILTERS ===== */}
-      <div className="panel" style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: '0 0 8px' }}>Library Filters</h3>
+            {/* ===== FILTERS ===== */}
+      <details className="panel" open>
+        <summary className="panel-summary">
+          <span>Library Filters</span>
+          <span style={{ fontSize: 12, opacity: 0.8 }}>
+            {filtersActive ? '• active' : '• none'}
+          </span>
+        </summary>
+
 
         {/* Search */}
         <div style={{ display: 'grid', gap: 6, marginBottom: 8 }}>
@@ -1217,7 +1319,8 @@ overflowX: 'hidden'
             value={filters.q}
             onChange={e => setFilters(f => ({ ...f, q: e.target.value }))}
           />
-        </div>
+              </div>
+
 
  {/* Selects */}
 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))', gap:6, marginBottom:8 }}>
@@ -1333,15 +1436,17 @@ overflowX: 'hidden'
             Showing <strong>{filteredLibrary.length}</strong> of {library.length}
           </div>
         </div>
-      </div>
+      </details>
 
-      {/* ===== LIBRARY LIST ===== */}
-      <div style={{ marginTop: 4 }}>
-        <h3 style={{ margin: '8px 0' }}>
+                  {/* ===== LIBRARY LIST ===== */}
+      <div>
+        <h3 style={{ margin: 0 }}>
           Library ({filteredLibrary.length} / {library.length})
         </h3>
 
-        <ul className="lib-list">
+        <ul className="lib-list" style={{ marginTop: 8 }}>
+
+
           {filteredLibrary.map(c => (
             <li key={c.id} className={`lib-item ${c.id === card.id ? 'on' : ''}`}>
               <div
@@ -1375,27 +1480,39 @@ overflowX: 'hidden'
 </button>
             </li>
           ))}
-        </ul>
-
-        {/* Import / Export library JSON */}
-<div style={{ marginTop: 8, display:'flex', flexDirection:'column', gap:6 }}>
-  <button onClick={exportLibrary}>⇩ Export JSON (all)</button>
-  <button onClick={exportFilteredCardsJson}>
-    ⇩ Export JSON {filtersActive ? `(filtered — ${filteredLibrary.length})` : `(all — ${library.length})`}
-  </button>
-  <button onClick={exportCurrentCardJson}>⇩ Export JSON (current card)</button>
-
-  <label style={{ display:'flex', flexDirection:'column', gap:4 }}>
-    ⇧ Import JSON
-    <input type="file" accept=".json" onChange={importLibrary} />
-  </label>
-</div>
-
+      </ul>
       </div>
 
+
+      {/* ===== LIBRARY JSON ===== */}
+      <details className="panel">
+        <summary className="panel-summary">
+          <span>Library JSON</span>
+        </summary>
+
+        <div style={{ paddingTop: 8 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            <button onClick={exportLibrary}>⇩ Export JSON (all)</button>
+            <button onClick={exportFilteredCardsJson}>
+              ⇩ Export JSON {filtersActive ? `(filtered — ${filteredLibrary.length})` : `(all — ${library.length})`}
+            </button>
+            <button onClick={exportCurrentCardJson}>⇩ Export JSON (current card)</button>
+
+            <label style={{ display:'flex', flexDirection:'column', gap:4 }}>
+              ⇧ Import JSON
+              <input type="file" accept=".json" onChange={importLibrary} />
+            </label>
+          </div>
+        </div>
+      </details>
+
       {/* ===== EXPORT SETTINGS (moved here) ===== */}
-      <div className="panel" style={{ marginTop: 12 }}>
-        <h3 style={{ margin: '0 0 8px' }}>Export</h3>
+            <details className="panel">
+        <summary className="panel-summary">
+          <span>Export</span>
+        </summary>
+        <div className="panel-body-scroll">
+
 
         {/* Printer Mode (moved from editor) */}
         <label className="toggle-row" style={{ display:'grid', gridTemplateColumns:'auto 1fr', alignItems:'center', gap:6 }}>
@@ -1418,11 +1535,17 @@ overflowX: 'hidden'
             {batchUseFiltered && filtersActive ? ` — ${filteredLibrary.length}` : ''}
           </button>
         </div>
-      </div>
+              </div>
+      </details>
 
       {/* ===== BOTTOM: Fonts + Rarity palette ===== */}
-      <div className="panel" style={{ marginTop: 12 }}>
-        <h3 style={{ margin: '0 0 8px' }}>Display (Fonts & Palette)</h3>
+
+            <details className="panel">
+        <summary className="panel-summary">
+          <span>Display (Fonts & Palette)</span>
+        </summary>
+        <div className="panel-body-scroll">
+
         <div style={{ display:'grid', gap:8 }}>
           <label style={{ display:'grid', gridTemplateColumns:'auto 1fr', alignItems:'center', gap:6 }}>
             <span style={{ whiteSpace:'nowrap' }}>Title font</span>
@@ -1460,8 +1583,10 @@ overflowX: 'hidden'
             <input type="file" accept=".woff,.woff2,.ttf,.otf" onChange={e=>addCustomFont(e.target.files[0])} />
           </label>
         </div>
-      </div>
+              </div>
+      </details>
     </section>
+
   </div>
 );
 }
