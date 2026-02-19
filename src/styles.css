@@ -81,6 +81,10 @@
   --rule-color: rgba(0,0,0,.35);
   --rule-gap: 3px;            /* space above/below the rule */
   
+    /* UI layout knob: raise this to make your sticky panels taller than the viewport */
+  --panel-vh: 100vh; /* try 110vh, 120vh, etc */
+
+  
 }
 
 @media (min-width: 768px){
@@ -1763,7 +1767,7 @@ html, body, #root{
 
 /* ===== Library list (dark-mode friendly) ===== */
 .lib-list{
-  list-style:none; padding:0; max-height:400px; overflow-y:auto;
+  list-style:none; padding:0; max-height:490px; overflow-y:auto;
   margin: 0;
 }
 .lib-item{

@@ -1018,7 +1018,7 @@ const exportFilteredCardsJson = () => {
     position: 'sticky',
     top: 16,
     alignSelf: 'flex-start',
-    maxHeight: 'calc(100vh - 32px)',
+    maxHeight: 'calc(var(--panel-vh) - 32px)',
     overflow: 'visible',
     zIndex: 50
       }}
@@ -1077,7 +1077,7 @@ const exportFilteredCardsJson = () => {
     position: 'sticky',
     top: 16,
     alignSelf: 'flex-start',
-    maxHeight: 'calc(100vh - 32px)',
+    maxHeight: 'calc(var(--panel-vh) - 32px)',
     overflowY: 'auto',
     overflowX: 'hidden'
   }}
@@ -1109,7 +1109,7 @@ const exportFilteredCardsJson = () => {
         position: 'sticky',
         top: 16,
         alignSelf: 'flex-start',
-        maxHeight: 'calc(100vh - 32px)',
+        maxHeight: 'calc(var(--panel-vh) - 32px)',
         overflowY: 'auto',
 overflowX: 'hidden'
 
@@ -1274,7 +1274,7 @@ overflowX: 'hidden'
         position: 'sticky',
         top: 16,
         alignSelf: 'flex-start',
-        maxHeight: 'calc(100vh - 32px)',
+        maxheight: 'calc(var(--panel-vh) - 32px)',
         overflow: 'hidden',
 
         maxHeight: 'calc(100vh - 32px)',
@@ -1487,7 +1487,7 @@ overflowX: 'hidden'
       {/* ===== LIBRARY JSON ===== */}
       <details className="panel">
         <summary className="panel-summary">
-          <span>Library JSON</span>
+          <span>Export JSON</span>
         </summary>
 
         <div style={{ paddingTop: 8 }}>
@@ -1509,7 +1509,7 @@ overflowX: 'hidden'
       {/* ===== EXPORT SETTINGS (moved here) ===== */}
             <details className="panel">
         <summary className="panel-summary">
-          <span>Export</span>
+          <span>Export PDF</span>
         </summary>
         <div className="panel-body-scroll">
 
