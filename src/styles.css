@@ -94,6 +94,28 @@
   :root{ --page-gutter-x: 24px; }
 }
 
+/* App feels like an app: no text selection/caret on UI chrome */
+body, #root {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* But allow selection + caret where typing happens */
+input, textarea, select, button,
+[contenteditable="true"],
+.skill-editor, .json-editor, .text-editor { /* keep your real editor wrappers here */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+  outline: 2px solid var(--ui-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Layout shell */
 .app-grid{
   display:grid; grid-template-columns:minmax(360px,auto) 1fr;
@@ -884,8 +906,17 @@ strong.num, .num{
   --ui-muted:      #666;
   --ui-border:     #cfcfd6;
   --ui-input-bg:   #fff;
-  --ui-accent:     #6a3fa0;  /* used for small UI accents (not the card) */
+  --ui-accent:     #6a3fa0;
   --ui-accent-ink: #ffffff;
+
+  /* NEW: consistent “theme completeness” knobs */
+  --ui-hover-bg:        rgba(0,0,0,.04);
+  --ui-hover-border:    rgba(0,0,0,.10);
+  --ui-focus-ring:      rgba(106,63,160,.65);
+
+  --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(0,0,0,.25);
+  --ui-scrollbar-thumb-hover: rgba(0,0,0,.35);
 }
 
 /* Dim theme */
@@ -899,6 +930,14 @@ strong.num, .num{
   --ui-input-bg:   #342c3e;
   --ui-accent:     #8b5cf6;
   --ui-accent-ink: #0b0418;
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(139, 92, 246, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(139, 92, 246, 0.48);
+
+  --ui-hover-bg: rgba(139, 92, 246, 0.10);
+  --ui-hover-border: rgba(139, 92, 246, 0.28);
+
+  --ui-focus-ring: rgba(139, 92, 246, 0.85);
 }
 
 /* Spirit (mystical purple) */
@@ -912,6 +951,14 @@ strong.num, .num{
   --ui-input-bg:   #2a2036;
   --ui-accent:     #a277ff;  /* dreamy purple */
   --ui-accent-ink: #0a0414;
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(162, 119, 255, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(162, 119, 255, 0.48);
+
+  --ui-hover-bg: rgba(162, 119, 255, 0.10);
+  --ui-hover-border: rgba(162, 119, 255, 0.28);
+
+  --ui-focus-ring: rgba(162, 119, 255, 0.85);
 }
 
 /* Killijam (Shadow King) — acid green on pitch black */
@@ -929,6 +976,14 @@ strong.num, .num{
   /* Accent = Killijam’s necro-glow */
   --ui-accent:     #9ef01a;  /* toxic/ectoplasmic green */
   --ui-accent-ink: #031003;  /* very dark green for text on accent */
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(158, 240, 26, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(158, 240, 26, 0.48);
+
+  --ui-hover-bg: rgba(158, 240, 26, 0.10);
+  --ui-hover-border: rgba(158, 240, 26, 0.28);
+
+  --ui-focus-ring: rgba(158, 240, 26, 0.85);
 }
 
 /* (Optional) subtle glow on primary/accented controls in Killijam */
@@ -952,6 +1007,12 @@ strong.num, .num{
   /* Iridescent accent (lavender → shell-pink) */
   --ui-accent:     #e7b9ff;
   --ui-accent-ink: #2b0f3d;  /* dark ink on accent */
+  
+  --ui-scrollbar-thumb: rgba(74,24,134,.20);
+--ui-scrollbar-thumb-hover: rgba(74,24,134,.30);
+--ui-hover-bg: rgba(185,150,245,.12);
+--ui-hover-border: rgba(185,150,245,.25);
+--ui-focus-ring: rgba(185,150,245,.70);
 }
 
 /* Pearlescent sheen on panels */
@@ -1002,6 +1063,15 @@ strong.num, .num{
 
   /* Optional: pure silver for icons/lines if needed */
   --ui-chrome:     #cdd1d6;
+  
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(212, 21, 58, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(212, 21, 58, 0.48);
+
+  --ui-hover-bg: rgba(212, 21, 58, 0.10);
+  --ui-hover-border: rgba(212, 21, 58, 0.28);
+
+  --ui-focus-ring: rgba(212, 21, 58, 0.85);
 }
 
 /* Silvered panels with subtle wine gradient */
@@ -1081,6 +1151,14 @@ strong.num, .num{
   /* Extras for paper/smoke trims if you use them */
   --ui-paper:      #efe6cd;   /* warm parchment */
   --ui-smoke:      #222826;   /* overlay smoke */
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(184, 255, 74, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(184, 255, 74, 0.48);
+
+  --ui-hover-bg: rgba(184, 255, 74, 0.10);
+  --ui-hover-border: rgba(184, 255, 74, 0.28);
+
+  --ui-focus-ring: rgba(184, 255, 74, 0.85);
 }
 
 /* Twilight panels: cold-smoke with a faint dream gradient */
@@ -1184,6 +1262,14 @@ strong.num, .num{
   /* Auxiliary tones for decorative effects */
   --ui-ice:        #a9e0ff;   /* glacial glow */
   --ui-bone:       #e8e3d9;   /* weathered bone */
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(192, 24, 38, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(192, 24, 38, 0.48);
+
+  --ui-hover-bg: rgba(192, 24, 38, 0.10);
+  --ui-hover-border: rgba(192, 24, 38, 0.28);
+
+  --ui-focus-ring: rgba(192, 24, 38, 0.85);
 }
 
 /* Frosted panels: smoke gradient with icy bloom */
@@ -1281,6 +1367,15 @@ strong.num, .num{
   /* Extras */
   --ui-ember:      #ffd166;   /* yellow ember highlights */
   --ui-iron:       #98a4b3;   /* brushed steel highlight */
+  
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(255, 122, 26, 0.28);
+  --ui-scrollbar-thumb-hover: rgba(255, 122, 26, 0.48);
+
+  --ui-hover-bg: rgba(255, 122, 26, 0.10);
+  --ui-hover-border: rgba(255, 122, 26, 0.28);
+
+  --ui-focus-ring: rgba(255, 122, 26, 0.85);
 }
 
 /* Iron panels with ember bloom + brushed texture */
@@ -1380,6 +1475,14 @@ strong.num, .num{
   /* Extras */
   --ui-ember:      #ffd693;   /* hot ember */
   --ui-stone:      #8d92a3;   /* stone highlight */
+    --ui-scrollbar-track: transparent;
+  --ui-scrollbar-thumb: rgba(255, 138, 31, 0.22);
+  --ui-scrollbar-thumb-hover: rgba(255, 138, 31, 0.34);
+
+  --ui-hover-bg: rgba(255, 138, 31, 0.12);
+  --ui-hover-border: rgba(255, 138, 31, 0.24);
+
+  --ui-focus-ring: rgba(255, 138, 31, 0.65);
 }
 
 /* Panels — bright stone with subtle orange spotlights */
@@ -1470,6 +1573,14 @@ strong.num, .num{
   /* Signature neon accents */
   --ui-accent:     #9BFF3A;   /* toxic lime */
   --ui-accent-ink: #061103;
+  
+  --ui-scrollbar-thumb: rgba(155,255,58,.35);
+--ui-scrollbar-thumb-hover: rgba(155,255,58,.55);
+--ui-scrollbar-track: transparent;
+
+--ui-hover-bg: rgba(155,255,58,.10);
+--ui-hover-border: rgba(155,255,58,.35);
+--ui-focus-ring: rgba(25,226,255,.85);
 
   /* Holographic ramp used in borders + badges */
   --holo-1: #91ff2b;
@@ -1623,16 +1734,7 @@ strong.num, .num{
   outline-offset: 2px;
 }
 
-[data-theme="spirit-overdrive"] .app-grid > section{
-  scrollbar-color: rgba(155,255,58,.35) transparent;
-}
-[data-theme="spirit-overdrive"] .app-grid > section::-webkit-scrollbar{ width: 10px; }
-[data-theme="spirit-overdrive"] .app-grid > section::-webkit-scrollbar-thumb{
-  background: rgba(155,255,58,.35);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
+
 
 /* ===== Animations ===== */
 
@@ -1698,6 +1800,25 @@ section, .panel{
 .app-grid > section{
   scrollbar-gutter: stable;
   overflow-x: hidden;
+
+  /* Firefox */
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-scrollbar-track);
+  scrollbar-width: thin;
+}
+
+/* WebKit (Chrome/Edge/Safari) */
+.app-grid > section::-webkit-scrollbar{ width: 10px; height: 10px; }
+.app-grid > section::-webkit-scrollbar-track{ background: var(--ui-scrollbar-track); }
+.app-grid > section::-webkit-scrollbar-thumb{
+  background: var(--ui-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.app-grid > section::-webkit-scrollbar-thumb:hover{
+  background: var(--ui-scrollbar-thumb-hover);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 
@@ -1719,7 +1840,11 @@ button{
   border-radius: 6px;
   cursor: pointer;
 }
-button:hover{ filter: brightness(1.05); }
+button:hover{
+  filter: none;
+  background: var(--ui-hover-bg);
+  border-color: var(--ui-hover-border);
+}
 
 /* Tiny accents for toggles / pills if you use them later */
 .badge, .pill{
@@ -1767,37 +1892,49 @@ html, body, #root{
 
 /* ===== Library list (dark-mode friendly) ===== */
 .lib-list{
-  list-style:none; padding:0; max-height:490px; overflow-y:auto;
+  list-style:none; padding:0; max-height:490px; overflow-y:auto; overflow-x:hidden;
   margin: 0;
 }
 .lib-item{
-  display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px;
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items:start;          /* <- key: top-align content + delete button */
+  gap:8px;
   border:1px solid var(--ui-border);
   background: var(--ui-surface);
   border-radius:8px;
-  padding:6px 8px; margin-bottom:6px;
+  padding:6px 8px;
+  margin-bottom:6px;
 }
 .lib-item.on{
   border-color: var(--ui-accent);
   box-shadow: inset 0 0 0 1px var(--ui-accent);
 }
-.lib-main{ cursor:pointer; display:grid; gap:2px; }
-.lib-name{ font-weight:600; line-height:1.2; color: var(--ui-text); }
+.lib-main{ cursor:pointer; display:grid; gap:2px; min-width:0; }
+.lib-name{ font-weight:600; line-height:1.2; color: var(--ui-text); min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .lib-meta{
-  font-size:12px; color: var(--ui-muted);
-  display:flex; gap:6px; flex-wrap:wrap;
+  font-size:12px;
+  color: var(--ui-muted);
+  display:flex;
+  gap:6px;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .lib-del{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  align-self:start;         /* <- always sits at top of its grid cell */
+  margin-top:1px;           /* tiny optical alignment tweak */
   background:#e44;
   color:#fff;
   border:none;
   width:24px;
   height:24px;
   padding:0;
-  line-height:1;           /* important for centering the glyph */
+  line-height:1;            /* keeps the × centered */
   font-weight:800;
   font-size:14px;
   border-radius:6px;

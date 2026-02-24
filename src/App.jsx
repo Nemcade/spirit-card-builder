@@ -269,7 +269,38 @@ const includesCI = (hay, needle) =>
 const uniqSorted = (arr) =>
   Array.from(new Set(arr.filter(Boolean).map(s => String(s).trim()))).sort((a,b)=>a.localeCompare(b));
   
- 
+ /* Utility: stable-ish string compare (case-insensitive + numeric chunks) */
+const cmpStr = (a, b) =>
+  String(a ?? '').localeCompare(String(b ?? ''), undefined, { sensitivity: 'base', numeric: true });
+
+/* Utility: version compare (supports "1", "1.2", "1.2.3"; non-numeric => 0) */
+const parseVer = (v) =>
+  String(v ?? '')
+    .trim()
+    .split('.')
+    .map(x => {
+      const n = parseInt(x, 10);
+      return Number.isFinite(n) ? n : 0;
+    });
+
+const cmpVer = (a, b) => {
+  const A = parseVer(a);
+  const B = parseVer(b);
+  const n = Math.max(A.length, B.length);
+  for (let i = 0; i < n; i++) {
+    const da = A[i] ?? 0;
+    const db = B[i] ?? 0;
+    if (da !== db) return da - db;
+  }
+  return 0;
+};
+
+const primaryProf = (c) => {
+  const profs = Array.from(
+    new Set((c?.skills || []).map(s => String(s?.proficiency || '').trim()).filter(Boolean))
+  ).sort(cmpStr);
+  return profs[0] || '';
+};
 
 
 /* --------------------------------------------------------------------------
@@ -320,6 +351,27 @@ export default function App() {
 
   /* ✅ FIX: lazy-init with a real object, not the function */
   const [card, setCard]         = useState(() => blankCard());
+  
+  // --- Library sorting ---
+const SORTS = [
+  { id: 'NAME_ASC',    label: 'Alphabetical (A→Z)' },
+  { id: 'NAME_DESC',   label: 'Alphabetical (Z→A)' },
+  { id: 'NEWEST',      label: 'Newest first' },
+  { id: 'OLDEST',      label: 'Oldest first' },
+  { id: 'PROF_ASC',    label: 'Proficiency (A→Z)' },
+  { id: 'PROF_DESC',   label: 'Proficiency (Z→A)' },
+  { id: 'VERSION_DESC',label: 'Version (high→low)' },
+  { id: 'VERSION_ASC', label: 'Version (low→high)' },
+
+  // “standard” extras that tend to be useful
+  { id: 'TYPE_ASC',    label: 'Type (A→Z)' },
+  { id: 'RARITY_ASC',  label: 'Rarity (A→Z)' },
+  { id: 'VALUE_DESC',  label: 'Value (high→low)' },
+  { id: 'VALUE_ASC',   label: 'Value (low→high)' },
+];
+
+const [libSort, setLibSort] = useState(() => localStorage.getItem('lib.sort') || 'NAME_ASC');
+useEffect(() => localStorage.setItem('lib.sort', libSort), [libSort]);
   
   // --- UI theme (Light / Dim / Spirit) ---
   const THEMES = ['light','dim','spirit','killijam','menia','seranna','nyma','mirium','zarek','joroth','spirit-overdrive'];
@@ -701,6 +753,46 @@ const [zoom, setZoom] = useState(1.00);
       return true;
     });
   }, [library, filters]);
+
+// Map card.id -> original library index (used for newest/oldest)
+const libIndex = useMemo(() => {
+  const m = new Map();
+  (library || []).forEach((c, i) => m.set(c.id, i));
+  return m;
+}, [library]);
+
+const sortedFilteredLibrary = useMemo(() => {
+  const arr = [...filteredLibrary];
+
+  const idx = (c) => libIndex.get(c.id) ?? 0;
+  const val = (c) => (Number.isFinite(+c.value) ? +c.value : 0);
+  const prof = (c) => primaryProf(c) || '~~~'; // push blanks to end for ASC
+
+  arr.sort((a, b) => {
+    switch (libSort) {
+      case 'NAME_ASC':      return cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'NAME_DESC':     return cmpStr(b.name, a.name) || (idx(a) - idx(b));
+      case 'NEWEST':        return idx(b) - idx(a);
+      case 'OLDEST':        return idx(a) - idx(b);
+
+      case 'PROF_ASC':      return cmpStr(prof(a), prof(b)) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'PROF_DESC':     return cmpStr(prof(b), prof(a)) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+
+      case 'VERSION_DESC':  return cmpVer(b.version, a.version) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'VERSION_ASC':   return cmpVer(a.version, b.version) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+
+      case 'TYPE_ASC':      return cmpStr(a.type, b.type) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'RARITY_ASC':    return cmpStr(a.rarity, b.rarity) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'VALUE_DESC':    return val(b) - val(a) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+      case 'VALUE_ASC':     return val(a) - val(b) || cmpStr(a.name, b.name) || (idx(a) - idx(b));
+
+      default:              return cmpStr(a.name, b.name) || (idx(a) - idx(b));
+    }
+  });
+
+  return arr;
+}, [filteredLibrary, libSort, libIndex]);
+
 
 // === JSON exports ===
 const exportCurrentCardJson = () => {
@@ -1269,20 +1361,23 @@ overflowX: 'hidden'
 
     {/* 4) LIBRARY — Search, Filters, Library, Export, and (bottom) Fonts/Palette */}
         <section
-      style={{
-        gridColumn: '4',
-        position: 'sticky',
-        top: 16,
-        alignSelf: 'flex-start',
-        maxheight: 'calc(var(--panel-vh) - 32px)',
-        overflow: 'hidden',
+  style={{
+    gridColumn: '4',
+    position: 'sticky',
+    top: 16,
+    alignSelf: 'flex-start',
+    maxHeight: 'calc(100vh - 32px)',
 
-        maxHeight: 'calc(100vh - 32px)',
-        overflow: 'auto',
-        paddingRight: 4
+    /* Key: only vertical scrolling in this column */
+    overflowY: 'auto',
+    overflowX: 'hidden',
 
-      }}
-    >
+    /* Helps prevent grid children forcing width */
+    minWidth: 0,
+
+    paddingRight: 4
+  }}
+>
 
       {/* Theme (moved here) */}
       <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', alignItems:'center', gap:8, marginBottom:8, fontSize:12 }}>
@@ -1440,14 +1535,23 @@ overflowX: 'hidden'
 
                   {/* ===== LIBRARY LIST ===== */}
       <div>
-        <h3 style={{ margin: 0 }}>
-          Library ({filteredLibrary.length} / {library.length})
-        </h3>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+  <h3 style={{ margin: 0, fontSize: 14, lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+  Library ({filteredLibrary.length} / {library.length})
+</h3>
+
+  <label style={{ display:'flex', alignItems:'center', gap:6, fontSize:12 }}>
+    Sort:
+    <select value={libSort} onChange={e => setLibSort(e.target.value)}>
+      {SORTS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+    </select>
+  </label>
+</div>
 
         <ul className="lib-list" style={{ marginTop: 8 }}>
 
 
-          {filteredLibrary.map(c => (
+          {sortedFilteredLibrary.map(c => (
             <li key={c.id} className={`lib-item ${c.id === card.id ? 'on' : ''}`}>
               <div
                 onClick={() => selectCard(c.id)}
@@ -1456,19 +1560,10 @@ overflowX: 'hidden'
               >
                 <div className="lib-name">{c.name || '[unnamed]'}</div>
                 <div className="lib-meta">
-                  <span>{c.type || '—'}</span>
-                  <span>• {c.rarity || '—'}</span>
-                  <span>• {c.size || '—'}</span>
-                  <span>• Value {Number.isFinite(+c.value) ? +c.value : 0} {c.valueType || ''}</span>
-				     {c.version ? <span>• v {c.version}</span> : null}
-                  {!!(c.skills || []).length && (
-                    <span className="lib-profs" style={{ whiteSpace:'nowrap' }}>
-                      • {Array.from(new Set((c.skills || []).map(s => s?.proficiency || '').filter(Boolean)))
-                          .slice(0, 2).join(', ')}
-                      {Array.from(new Set((c.skills || []).map(s => s?.proficiency || '').filter(Boolean))).length > 2 ? '…' : ''}
-                    </span>
-                  )}
-                </div>
+  <span>{c.type || '—'}</span>
+  <span>• {c.rarity || '—'}</span>
+  <span>• {c.size || '—'}</span>
+</div>
               </div>
               <button
   onClick={() => deleteCard(c.id)}
